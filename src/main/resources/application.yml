@@ -1,0 +1,30 @@
+server:
+  port: 18080
+  address: 0.0.0.0
+
+#telegram
+telegram:
+  webhook-path: https://4a8f-2a01-e5c0-4614-00-2.ngrok-free.app/webhook
+  bot-name: WaterGuardBot
+  bot-token: 7753531757:AAF8CI7_GVs-i4SIHYqun9tyP5U998E-H3c
+
+#spring
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/waterlevelbot
+    password: postgres
+    username: postgres
+  application:
+    name: waterguardbot
+  thymeleaf:
+    prefix: classpath:/templates/
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+#yandex
+yandex:
+  api:
+    key: 07f75823-cbb0-4046-83ee-d4dc403b9329
+
+domain:
+  url: https://4a8f-2a01-e5c0-4614-00-2.ngrok-free.app/statistics
