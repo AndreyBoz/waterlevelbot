@@ -28,10 +28,10 @@ public class SensorData implements Serializable {
     private Float waterLevel;
 
     @Column(name = "temperature")
-    private Float temperature; // Новое поле: температура
+    private Float temperature;
 
     @Column(name = "humidity")
-    private Float humidity; // Новое поле: влажность
+    private Float humidity;
 
     @ManyToOne
     @JoinColumn(name = "sensor_id", referencedColumnName = "id")

@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: water_level_bot
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5430:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d water_level_bot"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: waterguardbot_app
+    ports:
+      - "80:80"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DOMAIN_URL: https://b979-2a01-e5c0-4614-00-2.ngrok-free.app
+      TELEGRAM_BOT_NAME: WaterGuardBot
+      TELEGRAM_BOT_TOKEN: 7753531757:AAF8CI7_GVs-i4SIHYqun9tyP5U998E-H3c
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/water_level_bot
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      YANDEX_API_KEY: 07f75823-cbb0-4046-83ee-d4dc403b9329
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    driver: local

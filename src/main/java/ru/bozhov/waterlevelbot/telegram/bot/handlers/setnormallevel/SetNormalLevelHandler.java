@@ -1,9 +1,8 @@
-package ru.bozhov.waterlevelbot.telegram.bot.handlers.edit;
+package ru.bozhov.waterlevelbot.telegram.bot.handlers.setnormallevel;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -19,10 +18,12 @@ import ru.bozhov.waterlevelbot.telegram.service.TelegramUserService;
 
 import java.util.Collections;
 
+import static ru.bozhov.waterlevelbot.telegram.model.BotState.SET_NORMAL_LEVEL;
+
 @Slf4j
 @Component
 @AllArgsConstructor
-public class EditSensorHandler implements BotStateHandler {
+public class SetNormalLevelHandler implements BotStateHandler {
     private final BotService botService;
     private final SensorSelectionUtil selectionUtil;
     private final SensorRepository sensorRepo;
@@ -30,7 +31,7 @@ public class EditSensorHandler implements BotStateHandler {
 
     @Override
     public Boolean matches(TelegramUser telegramUser) {
-        return BotState.EDIT_SENSOR_ADDRESS.name().equals(telegramUser.getBotState());
+        return SET_NORMAL_LEVEL.name().equals(telegramUser.getBotState());
     }
 
     @Override
@@ -38,6 +39,7 @@ public class EditSensorHandler implements BotStateHandler {
         String callback = update.getCallbackQuery().getData();
         int messageId = update.getCallbackQuery().getMessage().getMessageId();
 
+        // Обработка выбора датчика через селект
         EditMessageText edit = selectionUtil.handleSelection(update, callback, messageId);
         if (edit != null) {
             botService.sendEditMessage(telegramUser, edit);
@@ -45,15 +47,15 @@ public class EditSensorHandler implements BotStateHandler {
 
         Sensor selected = selectionUtil.getSelection(telegramUser.getChatId());
         if (selected != null) {
+            // Запрашиваем нормальный уровень
             String prompt = String.format(
                     "✅ Выбран датчик \"%s\" (ID %d).\n\n" +
-                            "📍 Пожалуйста, введите адрес датчика через запятую в формате:\n" +
-                            "Регион, Район, Тип водоёма, Название водоёма, Ближайший город, Описание.\n\n" +
-                            "📝 Пример:\n" +
-                            "Московская область, Подмосковный район, Озеро, Сенеж, Солнечногорск, Живописное озеро недалеко от Москвы",
+                            "📍 Введите нормальный уровень воды в метрах (например, 1.5):",
                     selected.getSensorName(), selected.getId()
             );
 
+            telegramUserService.changeBotState(telegramUser, SET_NORMAL_LEVEL);
+            // Кнопка отмены
             InlineKeyboardMarkup cancelMarkup = new InlineKeyboardMarkup(
                     Collections.singletonList(
                             Collections.singletonList(
@@ -74,7 +76,7 @@ public class EditSensorHandler implements BotStateHandler {
                             .build()
             );
 
-            telegramUserService.changeBotState(telegramUser, BotState.SENSOR_EDIT_ACCEPT);
+            telegramUserService.changeBotState(telegramUser, BotState.SET_NORMAL_LEVEL_ACCEPT);
         }
     }
 }

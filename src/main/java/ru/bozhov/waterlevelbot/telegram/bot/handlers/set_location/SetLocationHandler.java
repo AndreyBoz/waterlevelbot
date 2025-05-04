@@ -1,9 +1,8 @@
-package ru.bozhov.waterlevelbot.telegram.bot.handlers.edit;
+package ru.bozhov.waterlevelbot.telegram.bot.handlers.set_location;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -22,7 +21,7 @@ import java.util.Collections;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class EditSensorHandler implements BotStateHandler {
+public class SetLocationHandler implements BotStateHandler {
     private final BotService botService;
     private final SensorSelectionUtil selectionUtil;
     private final SensorRepository sensorRepo;
@@ -30,7 +29,7 @@ public class EditSensorHandler implements BotStateHandler {
 
     @Override
     public Boolean matches(TelegramUser telegramUser) {
-        return BotState.EDIT_SENSOR_ADDRESS.name().equals(telegramUser.getBotState());
+        return BotState.SET_GEOLOCATION.name().equals(telegramUser.getBotState());
     }
 
     @Override
@@ -45,12 +44,12 @@ public class EditSensorHandler implements BotStateHandler {
 
         Sensor selected = selectionUtil.getSelection(telegramUser.getChatId());
         if (selected != null) {
+            // Вместо старого prompt:
             String prompt = String.format(
                     "✅ Выбран датчик \"%s\" (ID %d).\n\n" +
-                            "📍 Пожалуйста, введите адрес датчика через запятую в формате:\n" +
-                            "Регион, Район, Тип водоёма, Название водоёма, Ближайший город, Описание.\n\n" +
-                            "📝 Пример:\n" +
-                            "Московская область, Подмосковный район, Озеро, Сенеж, Солнечногорск, Живописное озеро недалеко от Москвы",
+                            "📍 Отправьте геометку или координаты в формате \"широта долгота\", например:\n" +
+                            "  • через геолокацию Telegram\n" +
+                            "  • или текстом: \"55.75396 37.620393\"",
                     selected.getSensorName(), selected.getId()
             );
 
@@ -74,7 +73,7 @@ public class EditSensorHandler implements BotStateHandler {
                             .build()
             );
 
-            telegramUserService.changeBotState(telegramUser, BotState.SENSOR_EDIT_ACCEPT);
+            telegramUserService.changeBotState(telegramUser, BotState.SET_GEOLOCATION_ACCEPT);
         }
     }
 }

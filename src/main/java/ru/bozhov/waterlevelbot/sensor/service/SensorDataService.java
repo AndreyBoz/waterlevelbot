@@ -116,7 +116,7 @@ public class SensorDataService {
     }
 
     private boolean isCriticalLevel(Float waterLevel, Sensor sensor) {
-        return sensor.getNormalLevel() < waterLevel;
+        return sensor.getNormalLevel()!=null && sensor.getNormalLevel() > waterLevel;
     }
 
 

@@ -1,0 +1,32 @@
+server:
+  port: ${SERVER_PORT:80}
+  address: 0.0.0.0
+
+telegram:
+  webhook-path: ${DOMAIN_URL}/webhook
+  bot-name: ${TELEGRAM_BOT_NAME}
+  bot-token: ${TELEGRAM_BOT_TOKEN}
+
+spring:
+  application:
+    name: waterlevelbot
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+yandex:
+  api:
+    key: ${YANDEX_API_KEY}
+
+domain:
+  url: ${DOMAIN_URL}/statistics

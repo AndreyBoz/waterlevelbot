@@ -216,11 +216,6 @@
 </div>
 
 <script th:inline="javascript">
-    /*<![CDATA[*/
-    // Регистрируем плагин зума с помощью правильного имени
-    Chart.register(ChartjsPluginZoom);
-
-    // Преобразуем sensorData в JavaScript-массив
     var sensorData = /*[[${sensorData}]]*/ [];
     var labels = sensorData.map(function(d) {
         return d.localDateTime.substring(0, 16);

@@ -45,6 +45,11 @@ public class SensorService {
         return sensorRepository.findSensorBySensorName(sensorName);
     }
 
+    public void subscribeSensor(TelegramUser user, Sensor sensor){
+        sensor.addSubscriber(user);
+        sensorRepository.save(sensor);
+    }
+
 
     public Optional<Sensor> findAwaitingLocationSensorByAdmin(TelegramUser user) {
         return sensorRepository.findSensorByAdminAndStatus(List.of(user), SensorStatus.AWAITING_LOCATION);
@@ -59,6 +64,11 @@ public class SensorService {
     @Transactional
     public void setCoordinate(Sensor sensor, Coordinate coordinate) {
         sensor.setCoordinate(coordinate);
+        sensorRepository.save(sensor);
+    }
+
+    public void setNormalLevel(Sensor sensor, Float normalLevel){
+        sensor.setNormalLevel(normalLevel);
         sensorRepository.save(sensor);
     }
 

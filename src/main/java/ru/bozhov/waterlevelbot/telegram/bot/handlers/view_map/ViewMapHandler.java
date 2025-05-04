@@ -1,9 +1,8 @@
-package ru.bozhov.waterlevelbot.telegram.bot.handlers.edit;
+package ru.bozhov.waterlevelbot.telegram.bot.handlers.view_map;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -16,21 +15,23 @@ import ru.bozhov.waterlevelbot.telegram.model.BotState;
 import ru.bozhov.waterlevelbot.telegram.model.TelegramUser;
 import ru.bozhov.waterlevelbot.telegram.service.BotService;
 import ru.bozhov.waterlevelbot.telegram.service.TelegramUserService;
+import ru.bozhov.waterlevelbot.yandex.YandexApiService;
 
 import java.util.Collections;
 
 @Slf4j
 @Component
 @AllArgsConstructor
-public class EditSensorHandler implements BotStateHandler {
+public class ViewMapHandler implements BotStateHandler {
     private final BotService botService;
     private final SensorSelectionUtil selectionUtil;
     private final SensorRepository sensorRepo;
     private final TelegramUserService telegramUserService;
+    private final YandexApiService yandexApiService;
 
     @Override
     public Boolean matches(TelegramUser telegramUser) {
-        return BotState.EDIT_SENSOR_ADDRESS.name().equals(telegramUser.getBotState());
+        return BotState.VIEW_MAP.name().equals(telegramUser.getBotState());
     }
 
     @Override
@@ -46,19 +47,23 @@ public class EditSensorHandler implements BotStateHandler {
         Sensor selected = selectionUtil.getSelection(telegramUser.getChatId());
         if (selected != null) {
             String prompt = String.format(
-                    "✅ Выбран датчик \"%s\" (ID %d).\n\n" +
-                            "📍 Пожалуйста, введите адрес датчика через запятую в формате:\n" +
-                            "Регион, Район, Тип водоёма, Название водоёма, Ближайший город, Описание.\n\n" +
-                            "📝 Пример:\n" +
-                            "Московская область, Подмосковный район, Озеро, Сенеж, Солнечногорск, Живописное озеро недалеко от Москвы",
+                    "⚠️ Координаты не установлены для датчика \"%s\" (ID %d).",
                     selected.getSensorName(), selected.getId()
             );
+            if(selected.getCoordinate()!=null) {
+                String mapLink = yandexApiService.getMapLink(selected.getCoordinate());
+                prompt = String.format(
+                        "✅ Выбран датчик \"%s\" (ID %d).\n" +
+                                "📊 Посмотреть по карте можно тут: %s",
+                        selected.getSensorName(), selected.getId(), mapLink
+                );
+            }
 
             InlineKeyboardMarkup cancelMarkup = new InlineKeyboardMarkup(
                     Collections.singletonList(
                             Collections.singletonList(
                                     InlineKeyboardButton.builder()
-                                            .text("Отмена")
+                                            .text("Назад")
                                             .callbackData("GO_BACK")
                                             .build()
                             )
@@ -74,7 +79,7 @@ public class EditSensorHandler implements BotStateHandler {
                             .build()
             );
 
-            telegramUserService.changeBotState(telegramUser, BotState.SENSOR_EDIT_ACCEPT);
+            telegramUserService.changeBotState(telegramUser, BotState.IDLE);
         }
     }
 }

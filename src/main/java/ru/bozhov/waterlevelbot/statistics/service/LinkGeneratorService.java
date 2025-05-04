@@ -10,7 +10,7 @@ import ru.bozhov.waterlevelbot.sensor.model.Sensor;
 public class LinkGeneratorService {
     private static String STATISTICS_URL;
 
-    @Value("${domain.url:https://localhost:8080/statistics}")
+    @Value("${domain.url:https://localhost:80/statistics}")
     private String statisticsUrl;
 
     @PostConstruct

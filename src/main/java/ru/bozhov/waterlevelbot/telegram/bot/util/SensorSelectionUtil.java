@@ -36,6 +36,17 @@ public class SensorSelectionUtil {
     private final Map<Long, String> currentCity   = new ConcurrentHashMap<>();
     private final Map<Long, String> currentDesc   = new ConcurrentHashMap<>();
 
+
+    Set<String> startCommands = Set.of(
+            "EDIT_SENSOR_ADDRESS",
+            "SHOW_STATS",
+            "CURRENT_DATA",
+            "VIEW_MAP",
+            "SET_GEOLOCATION",
+            "SET_NORMAL_LEVEL",
+            "SUBSCRIBE_SENSOR"
+    );
+
     public SensorSelectionUtil(SensorRepository sensorRepo) {
         this.sensorRepo = sensorRepo;
     }
@@ -294,7 +305,7 @@ public class SensorSelectionUtil {
         InlineKeyboardMarkup markup;
 
         // Обработка CONFIGURE_SENSOR перед однобуквенным разбором
-        if ("CONFIGURE_SENSOR".equals(cb) || "SHOW_STATS".equals(cb) || "CURRENT_DATA".equals(cb)) {
+        if (startCommands.contains(cb)) {
             text = "Выберите датчик (без адреса) или по адресу:";
             markup = keyboardForUnaddressed(chatId);
         }
@@ -402,7 +413,10 @@ public class SensorSelectionUtil {
     }
 
     public Sensor getSelection(Long chatId) {
-        return userSelection.get(chatId);
+        return Optional.ofNullable(userSelection.get(chatId))
+                .map(Sensor::getId)
+                .flatMap(sensorRepo::findById)
+                .orElse(null);
     }
 
     public void clearState(long chatId) {

@@ -42,7 +42,7 @@ public class CallbackHandler implements TelegramHandler {
         Optional<TelegramUser> userOptional = telegramUserService.findUserByChatId(chatId);
 
         if(userOptional.isEmpty()){
-           botService.sendMessage(telegramService.registerTelegramUser(chatId, update.getMessage().getFrom().getUserName()));
+           botService.sendMessage(telegramService.registerTelegramUser(chatId, update.getCallbackQuery().getFrom().getUserName()));
         }
 
         TelegramUser user = userOptional.get();
@@ -64,9 +64,25 @@ public class CallbackHandler implements TelegramHandler {
                     selectionUtil.clearState(chatId);
                     telegramUserService.changeBotState(user, BotState.STATISTICS);
                     break;
-                case "CONFIGURE_SENSOR":
+                case "EDIT_SENSOR_ADDRESS":
                     selectionUtil.clearState(chatId);
-                    telegramUserService.changeBotState(user, BotState.SENSOR_EDIT);
+                    telegramUserService.changeBotState(user, BotState.EDIT_SENSOR_ADDRESS);
+                    break;
+                case "SET_NORMAL_LEVEL":
+                    selectionUtil.clearState(chatId);
+                    telegramUserService.changeBotState(user, BotState.SET_NORMAL_LEVEL);
+                    break;
+                case "SUBSCRIBE_SENSOR":
+                    selectionUtil.clearState(chatId);
+                    telegramUserService.changeBotState(user, BotState.SUBSCRIBE_SENSOR);
+                    break;
+                case "SET_GEOLOCATION":
+                    selectionUtil.clearState(chatId);
+                    telegramUserService.changeBotState(user, BotState.SET_GEOLOCATION);
+                    break;
+                case "VIEW_MAP":
+                    selectionUtil.clearState(chatId);
+                    telegramUserService.changeBotState(user, BotState.VIEW_MAP);
                     break;
                 case "SHOW_HELP":
                     botService.sendEditMessage(user, CallBackMessages.getHelpMessage(chatId, messageId));
@@ -92,7 +108,5 @@ public class CallbackHandler implements TelegramHandler {
 
         return SendMessageUtils.setBackKeyboard(message);
     }
-
-
 
 }

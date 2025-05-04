@@ -43,7 +43,7 @@ public class BotService {
 
     public void sendCriticalLevelMessage(Sensor sensor, Float level){
         try {
-            for(var user: sensor.getAdmins()){
+            for(var user: sensor.getSubscribers()){
                 SendMessage message = new SendMessage();
                 message.setChatId(user.getChatId());
                 message.setText("Критический уровень воды зафиксирован на датчике: " + sensor.getSensorName() + "\n Тек. уровень: " + level);
