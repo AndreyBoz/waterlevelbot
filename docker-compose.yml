@@ -7,14 +7,16 @@ services:
     command:
       - --api.insecure=true
       - --providers.docker=true
-      - --entryPoints.web.address=:18080
+      - --entryPoints.web.address=:80
       - --entryPoints.websecure.address=:18443
       - --certificatesResolvers.le.acme.email=bozhov.a.02@gmail.com
       - --certificatesResolvers.le.acme.storage=/letsencrypt/acme.json
       - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
     ports:
-      - "18080:80"
-      - "18443:443"
+      - "80:80"        # HTTP-01 для ACME
+      - "18080:18443"  # HTTPS для клиентов на 18080
+    networks:
+      - web
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik_letsencrypt:/letsencrypt
@@ -38,6 +40,8 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
+    networks:
+      - web
 
   app:
     build: .
@@ -59,7 +63,7 @@ services:
       - "traefik.http.routers.waterguardbot.rule=Host(`waterlevelleti.ru`)"
       - "traefik.http.routers.waterguardbot.entrypoints=websecure"
       - "traefik.http.routers.waterguardbot.tls.certresolver=le"
-      - "traefik.http.services.waterguardbot.loadbalancer.server.port=80"
+      - "traefik.http.services.waterguardbot.loadbalancer.server.port=8080"
     networks:
       - web
     restart: unless-stopped
@@ -71,4 +75,4 @@ volumes:
 
 networks:
   web:
-    external: false
+    driver: bridge
