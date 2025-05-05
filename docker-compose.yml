@@ -7,9 +7,9 @@ services:
     command:
       - --api.insecure=true
       - --providers.docker=true
-      - --entryPoints.web.address=:80
-      - --entryPoints.websecure.address=:443
-      - --certificatesResolvers.le.acme.email=you@your-email.com
+      - --entryPoints.web.address=:18080
+      - --entryPoints.websecure.address=:18443
+      - --certificatesResolvers.le.acme.email=bozhov.a.02@gmail.com
       - --certificatesResolvers.le.acme.storage=/letsencrypt/acme.json
       - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
     ports:
