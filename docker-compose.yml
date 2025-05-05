@@ -1,6 +1,25 @@
 version: '3.9'
 
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --entryPoints.web.address=:80
+      - --entryPoints.websecure.address=:443
+      - --certificatesResolvers.le.acme.email=you@your-email.com
+      - --certificatesResolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    restart: unless-stopped
+
   postgres:
     image: postgres:latest
     container_name: postgres_container
@@ -23,8 +42,9 @@ services:
   app:
     build: .
     container_name: waterguardbot_app
-    ports:
-      - "8080:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DOMAIN_URL: https://waterlevelleti.ru
@@ -34,26 +54,21 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       YANDEX_API_KEY: 07f75823-cbb0-4046-83ee-d4dc403b9329
-    depends_on:
-      postgres:
-        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.waterguardbot.rule=Host(`waterlevelleti.ru`)"
+      - "traefik.http.routers.waterguardbot.entrypoints=websecure"
+      - "traefik.http.routers.waterguardbot.tls.certresolver=le"
+      - "traefik.http.services.waterguardbot.loadbalancer.server.port=80"
+    networks:
+      - web
     restart: unless-stopped
 
-  caddy:
-    image: caddy:2
-    container_name: caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"    # HTTP для валидации Let’s Encrypt
-      - "443:443"  # HTTPS
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - app
 volumes:
   pgdata:
     driver: local
-  caddy_data:
-  caddy_config:
+  traefik_letsencrypt:
+
+networks:
+  web:
+    external: false
