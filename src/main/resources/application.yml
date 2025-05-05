@@ -4,7 +4,7 @@ server:
 
 #telegram
 telegram:
-  webhook-path: https://4dd3-2a01-e5c0-4614-00-2.ngrok-free.app/webhook
+  webhook-path: https://waterlevelleti.ru/webhook
   bot-name: WaterGuardBot
   bot-token: 7753531757:AAF8CI7_GVs-i4SIHYqun9tyP5U998E-H3c
 
@@ -28,4 +28,4 @@ yandex:
     key: 07f75823-cbb0-4046-83ee-d4dc403b9329
 
 domain:
-  url: https://4dd3-2a01-e5c0-4614-00-2.ngrok-free.app/statistics
+  url: https://waterlevelleti.ru/statistics
