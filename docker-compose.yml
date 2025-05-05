@@ -62,6 +62,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       YANDEX_API_KEY: 07f75823-cbb0-4046-83ee-d4dc403b9329
     labels:
+      - "traefik.http.routers.waterguardbot.tls.certresolver=le-staging"
       - "traefik.enable=true"
       - "traefik.http.routers.waterguardbot.rule=Host(`waterlevelleti.ru`)"
       - "traefik.http.routers.waterguardbot.entrypoints=websecure"
