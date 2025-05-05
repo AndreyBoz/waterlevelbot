@@ -54,7 +54,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DOMAIN_URL: https://waterlevelleti.ru
+      DOMAIN_URL: https://waterlevelleti.ru:88
       TELEGRAM_BOT_NAME: WaterGuardBot
       TELEGRAM_BOT_TOKEN: 7753531757:AAF8CI7_GVs-i4SIHYqun9tyP5U998E-H3c
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/water_level_bot
