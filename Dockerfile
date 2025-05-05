@@ -27,10 +27,10 @@ COPY --from=build /app/${JAR_FILE} /app/app.jar
 WORKDIR /app
 
 # Открываем порт 80
-EXPOSE 80
+EXPOSE 8080
 
 # Переменные окружения по-умолчанию (переопределяются при docker run или в Compose)
-ENV SERVER_PORT=80 \
+ENV SERVER_PORT=8080 \
     SERVER_ADDRESS=0.0.0.0
 
 ENV SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/water_level_bot \
