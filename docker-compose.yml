@@ -5,25 +5,27 @@ services:
     image: traefik:v2.10
     container_name: traefik
     command:
+      # Включаем Docker и файлового провайдера
       - --api.insecure=true
       - --providers.docker=true
-      - --log.level=DEBUG
+      - --providers.file.filename=/etc/traefik/tls.yml
       - --entryPoints.web.address=:80
       - --entryPoints.websecure.address=:18443
       - --entryPoints.traefik.address=:8081
-      - --certificatesResolvers.le.acme.email=bozhov.a.02@gmail.com
-      - --certificatesResolvers.le.acme.storage=/letsencrypt/acme.json
-      - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
+      - --log.level=DEBUG
     ports:
-      - "80:80"        # HTTP-01 для ACME
-      - "88:18443"  # HTTPS для клиентов на 18080
-      - "8081:8081"
-    networks:
-      - web
+      - "80:80"        # HTTP (для редиректа на HTTPS, ACME не нужен)
+      - "88:18443"     # HTTPS для бота
+      - "8081:8081"    # Dashboard Traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik_letsencrypt:/letsencrypt
+      # Подключаем сертификаты и файл провайдера
+      - ./certs:/certs:ro
+      - ./traefik/tls.yml:/etc/traefik/tls.yml:ro
     restart: unless-stopped
+    networks:
+      - web
 
   postgres:
     image: postgres:latest
@@ -62,11 +64,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       YANDEX_API_KEY: 07f75823-cbb0-4046-83ee-d4dc403b9329
     labels:
-      - "traefik.http.routers.waterguardbot.tls.certresolver=le-staging"
       - "traefik.enable=true"
       - "traefik.http.routers.waterguardbot.rule=Host(`waterlevelleti.ru`)"
       - "traefik.http.routers.waterguardbot.entrypoints=websecure"
-      - "traefik.http.routers.waterguardbot.tls.certresolver=le"
+      - "traefik.http.routers.waterguardbot.tls=true"
       - "traefik.http.services.waterguardbot.loadbalancer.server.port=8080"
     networks:
       - web
