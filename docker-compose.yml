@@ -55,6 +55,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      SPRING_APPLICATION_JSON: >
+        {"domain":{"url":"https://waterlevelleti.ru:88/statistics"}}
       SPRING_PROFILES_ACTIVE: prod
       DOMAIN_URL: https://waterlevelleti.ru:88
       TELEGRAM_BOT_NAME: WaterGuardBot
