@@ -70,6 +70,9 @@ services:
       - "traefik.http.routers.waterguardbot.rule=Host(`waterlevelleti.ru`)"
       - "traefik.http.routers.waterguardbot.entrypoints=websecure"
       - "traefik.http.routers.waterguardbot.tls=true"
+      - "traefik.http.routers.waterguardbot-http.rule=Host(`waterlevelleti.ru`)"
+      - "traefik.http.routers.waterguardbot-http.entrypoints=web"
+      - "traefik.http.routers.waterguardbot-http.tls=false"
       - "traefik.http.services.waterguardbot.loadbalancer.server.port=8080"
     networks:
       - web
