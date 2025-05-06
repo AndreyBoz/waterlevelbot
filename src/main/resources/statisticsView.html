@@ -149,25 +149,25 @@
             <table>
                 <tr>
                     <th>Параметр</th>
-                    <th>Среднее</th>
+                    <th>Медианное</th>
                     <th>Максимальное</th>
                     <th>Минимальное</th>
                 </tr>
                 <tr>
                     <td>Уровень воды</td>
-                    <td th:text="${avgWaterLevel}">0</td>
+                    <td th:text="${medianWaterLevel}">0</td>
                     <td th:text="${maxWaterLevel}">0</td>
                     <td th:text="${minWaterLevel}">0</td>
                 </tr>
                 <tr>
                     <td>Температура</td>
-                    <td th:text="${avgTemperature}">0</td>
+                    <td th:text="${medianTemperature}">0</td>
                     <td th:text="${maxTemperature}">0</td>
                     <td th:text="${minTemperature}">0</td>
                 </tr>
                 <tr>
                     <td>Влажность</td>
-                    <td th:text="${avgHumidity}">0</td>
+                    <td th:text="${medianHumidity}">0</td>
                     <td th:text="${maxHumidity}">0</td>
                     <td th:text="${minHumidity}">0</td>
                 </tr>
@@ -255,5 +255,3 @@
     createChart('temperatureChart', 'Температура', temperatures);
     createChart('humidityChart', 'Влажность', humidities);
 </script>
-</body>
-</html>

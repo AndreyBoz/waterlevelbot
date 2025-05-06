@@ -97,9 +97,12 @@ public class SensorDataService {
         Sensor sensor = sensorOpt.get();
         SensorData sensorData = new SensorData();
         sensorData.setSensor(sensor);
-        sensorData.setHumidity(request.getHumidity());
-        sensorData.setTemperature(request.getTemperature());
-        sensorData.setWaterLevel(request.getWaterLevel());
+        if(request.getHumidity()!=null)
+            sensorData.setHumidity(request.getHumidity());
+        if(request.getTemperature()!=null)
+            sensorData.setTemperature(request.getTemperature());
+        if(request.getWaterLevel()!=null)
+            sensorData.setWaterLevel(request.getWaterLevel());
 
         try {
             DateTimeFormatter formatter =

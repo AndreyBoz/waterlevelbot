@@ -14,8 +14,8 @@ import ru.bozhov.waterlevelbot.sensor.service.SensorService;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @AllArgsConstructor
@@ -49,13 +49,12 @@ public class StatisticsController {
             @RequestParam("sensorName") String sensorName,
             @RequestParam("period")     String period) {
         Optional<Sensor> opt = sensorService.findSensorBySensorName(sensorName);
+        ModelAndView mav = new ModelAndView("statisticsView");
         if (opt.isEmpty()) {
-            ModelAndView mav = new ModelAndView("statisticsView");
             mav.addObject("error", "Сенсор с именем " + sensorName + " не найден.");
             return mav;
         }
         if(!opt.get().getSensorStatus().equals(SensorStatus.GET_DATA)){
-            ModelAndView mav = new ModelAndView("statisticsView");
             mav.addObject("error", "Датчик с именем " + sensorName + " не принимает данные.");
             return mav;
         }
@@ -88,36 +87,39 @@ public class StatisticsController {
             return mav;
         }
 
-        double avgWL = data.stream().mapToDouble(SensorData::getWaterLevel).average().orElse(0);
-        double maxWL = data.stream().mapToDouble(SensorData::getWaterLevel).max().orElse(0);
-        double minWL = data.stream().mapToDouble(SensorData::getWaterLevel).min().orElse(0);
+        // Вычисление медианных значений (float)
+        List<Float> wlValues = data.stream()
+                .map(SensorData::getWaterLevel)
+                .sorted()
+                .collect(Collectors.toList());
+        float medianWL = computeMedian(wlValues);
 
-        double avgT = data.stream().filter(d -> d.getTemperature() != null)
-                .mapToDouble(SensorData::getTemperature).average().orElse(0);
-        double maxT = data.stream().filter(d -> d.getTemperature() != null)
-                .mapToDouble(SensorData::getTemperature).max().orElse(0);
-        double minT = data.stream().filter(d -> d.getTemperature() != null)
-                .mapToDouble(SensorData::getTemperature).min().orElse(0);
+        List<Float> tempValues = data.stream()
+                .map(SensorData::getTemperature)
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+        float medianT = computeMedian(tempValues);
 
-        double avgH = data.stream().filter(d -> d.getHumidity() != null)
-                .mapToDouble(SensorData::getHumidity).average().orElse(0);
-        double maxH = data.stream().filter(d -> d.getHumidity() != null)
-                .mapToDouble(SensorData::getHumidity).max().orElse(0);
-        double minH = data.stream().filter(d -> d.getHumidity() != null)
-                .mapToDouble(SensorData::getHumidity).min().orElse(0);
+        List<Float> humValues = data.stream()
+                .map(SensorData::getHumidity)
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+        float medianH = computeMedian(humValues);
 
         mav.addObject("sensorData", data);
-        mav.addObject("avgWaterLevel", avgWL);
-        mav.addObject("maxWaterLevel", maxWL);
-        mav.addObject("minWaterLevel", minWL);
+        mav.addObject("medianWaterLevel", medianWL);
+        mav.addObject("maxWaterLevel", wlValues.isEmpty() ? 0f : Collections.max(wlValues));
+        mav.addObject("minWaterLevel", wlValues.isEmpty() ? 0f : Collections.min(wlValues));
 
-        mav.addObject("avgTemperature", avgT);
-        mav.addObject("maxTemperature", maxT);
-        mav.addObject("minTemperature", minT);
+        mav.addObject("medianTemperature", medianT);
+        mav.addObject("maxTemperature", tempValues.isEmpty() ? 0f : Collections.max(tempValues));
+        mav.addObject("minTemperature", tempValues.isEmpty() ? 0f : Collections.min(tempValues));
 
-        mav.addObject("avgHumidity", avgH);
-        mav.addObject("maxHumidity", maxH);
-        mav.addObject("minHumidity", minH);
+        mav.addObject("medianHumidity", medianH);
+        mav.addObject("maxHumidity", humValues.isEmpty() ? 0f : Collections.max(humValues));
+        mav.addObject("minHumidity", humValues.isEmpty() ? 0f : Collections.min(humValues));
 
         mav.addObject("sensorName", sensor.getSensorName());
         mav.addObject("period", period);
@@ -126,5 +128,15 @@ public class StatisticsController {
         mav.addObject("sensorCurrentTime", fmt);
 
         return mav;
+    }
+
+    private float computeMedian(List<Float> list) {
+        if (list.isEmpty()) return 0f;
+        int size = list.size();
+        if (size % 2 == 1) {
+            return list.get(size / 2);
+        } else {
+            return (list.get(size / 2 - 1) + list.get(size / 2)) / 2f;
+        }
     }
 }

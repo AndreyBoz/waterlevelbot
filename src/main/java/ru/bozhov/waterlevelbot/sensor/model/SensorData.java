@@ -24,13 +24,13 @@ public class SensorData implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "water_level", nullable = false)
+    @Column(name = "water_level", nullable = true)
     private Float waterLevel;
 
-    @Column(name = "temperature")
+    @Column(name = "temperature", nullable = true)
     private Float temperature;
 
-    @Column(name = "humidity")
+    @Column(name = "humidity", nullable = true)
     private Float humidity;
 
     @ManyToOne
