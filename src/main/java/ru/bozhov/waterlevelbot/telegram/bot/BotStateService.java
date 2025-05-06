@@ -19,13 +19,15 @@ public class BotStateService {
     }
 
     public void handleUpdateByBotState(Update update, TelegramUser telegramUser) {
-        // Перебираем обработчики, соответствующие текущему пользователю
+        if(update.getMessage()==null)
+            return;
+
         for (var handler : botStateHandlers) {
             if (handler.matches(telegramUser)) {
                 try {
                     handler.handle(update, telegramUser);
                 } catch (Exception e) {
-                    log.error("Ошибка при обработке update для chatId {}: {}", update.getMessage().getChatId(), e.getMessage(), e);
+                    log.error("Ошибка при обработке update {}: {}", update.getUpdateId(), e.getMessage(), e);
                     throw new RuntimeException(e);
                 }
             }
