@@ -2,6 +2,7 @@ package ru.bozhov.waterlevelbot.telegram.handler;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -40,6 +41,7 @@ public class CallbackHandler implements TelegramHandler {
         String callbackData = update.getCallbackQuery().getData();
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
         Optional<TelegramUser> userOptional = telegramUserService.findUserByChatId(chatId);
+        AnswerCallbackQuery answer = null;
 
         if(userOptional.isEmpty()){
            botService.sendMessage(telegramService.registerTelegramUser(chatId, update.getCallbackQuery().getFrom().getUserName()));
@@ -59,6 +61,10 @@ public class CallbackHandler implements TelegramHandler {
             switch (callbackData) {
                 case "REGISTER_SENSOR":
                     botService.sendEditMessage(user, CallBackMessages.getRegisterSensorMessage(chatId, messageId, telegramService.registerSensorCallback(user)));
+                    answer = AnswerCallbackQuery.builder()
+                            .callbackQueryId(update.getCallbackQuery().getId())
+                            .build();
+                    botService.executeAnswerCallback(answer);
                     return;
                 case "SHOW_STATS":
                     selectionUtil.clearState(chatId);
@@ -86,6 +92,10 @@ public class CallbackHandler implements TelegramHandler {
                     break;
                 case "SHOW_HELP":
                     botService.sendEditMessage(user, CallBackMessages.getHelpMessage(chatId, messageId));
+                    answer = AnswerCallbackQuery.builder()
+                            .callbackQueryId(update.getCallbackQuery().getId())
+                            .build();
+                    botService.executeAnswerCallback(answer);
                     return;
                 case "SHOW_DATA":
                     selectionUtil.clearState(chatId);
@@ -93,12 +103,15 @@ public class CallbackHandler implements TelegramHandler {
                     break;
                 default:
                     botService.sendMessage(errorMessage(update));
+                    answer = AnswerCallbackQuery.builder()
+                            .callbackQueryId(update.getCallbackQuery().getId())
+                            .build();
+                    botService.executeAnswerCallback(answer);
                     return;
             }
         }
 
         botStateService.handleUpdateByBotState(update, user);
-
     }
 
     public SendMessage errorMessage(Update update){

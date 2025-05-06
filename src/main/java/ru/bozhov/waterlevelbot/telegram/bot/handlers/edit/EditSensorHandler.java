@@ -3,6 +3,7 @@ package ru.bozhov.waterlevelbot.telegram.bot.handlers.edit;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -73,6 +74,11 @@ public class EditSensorHandler implements BotStateHandler {
                             .replyMarkup(cancelMarkup)
                             .build()
             );
+
+            AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
+                    .callbackQueryId(update.getCallbackQuery().getId())
+                    .build();
+            botService.executeAnswerCallback(answer);
 
             telegramUserService.changeBotState(telegramUser, BotState.SENSOR_EDIT_ACCEPT);
         }

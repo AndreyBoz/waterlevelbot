@@ -3,6 +3,7 @@ package ru.bozhov.waterlevelbot.telegram.bot.handlers.set_location;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -72,6 +73,11 @@ public class SetLocationHandler implements BotStateHandler {
                             .replyMarkup(cancelMarkup)
                             .build()
             );
+
+            AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
+                    .callbackQueryId(update.getCallbackQuery().getId())
+                    .build();
+            botService.executeAnswerCallback(answer);
 
             telegramUserService.changeBotState(telegramUser, BotState.SET_GEOLOCATION_ACCEPT);
         }

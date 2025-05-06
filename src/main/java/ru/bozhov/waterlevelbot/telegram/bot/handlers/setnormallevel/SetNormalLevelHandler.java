@@ -3,6 +3,7 @@ package ru.bozhov.waterlevelbot.telegram.bot.handlers.setnormallevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -75,6 +76,11 @@ public class SetNormalLevelHandler implements BotStateHandler {
                             .replyMarkup(cancelMarkup)
                             .build()
             );
+
+            AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
+                    .callbackQueryId(update.getCallbackQuery().getId())
+                    .build();
+            botService.executeAnswerCallback(answer);
 
             telegramUserService.changeBotState(telegramUser, BotState.SET_NORMAL_LEVEL_ACCEPT);
         }
