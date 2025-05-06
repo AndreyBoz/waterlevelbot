@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.bozhov.waterlevelbot.sensor.model.Sensor;
+import ru.bozhov.waterlevelbot.sensor.model.SensorStatus;
 import ru.bozhov.waterlevelbot.sensor.repository.SensorRepository;
 import ru.bozhov.waterlevelbot.statistics.service.LinkGeneratorService;
 import ru.bozhov.waterlevelbot.telegram.bot.BotStateHandler;
@@ -46,13 +47,17 @@ public class StatisticsHandler implements BotStateHandler {
 
         Sensor selected = selectionUtil.getSelection(telegramUser.getChatId());
         if (selected != null) {
-            String statsLink = generatorService.generateStatisticsLink(selected);
+            String prompt = "Датчик не готов к приёму данных.";
+            if (selected.getSensorStatus().equals(SensorStatus.GET_DATA)){
+                String statsLink = generatorService.generateStatisticsLink(selected);
 
-            String prompt = String.format(
-                    "✅ Выбран датчик \"%s\" (ID %d).\n" +
-                            "📊 Графики доступны по ссылке: %s",
-                    selected.getSensorName(), selected.getId(), statsLink
-            );
+                prompt = String.format(
+                        "✅ Выбран датчик \"%s\" (ID %d).\n" +
+                                "📊 Графики доступны по ссылке: %s",
+                        selected.getSensorName(), selected.getId(), statsLink
+                );
+
+            }
 
             InlineKeyboardMarkup cancelMarkup = new InlineKeyboardMarkup(
                     Collections.singletonList(
@@ -64,7 +69,6 @@ public class StatisticsHandler implements BotStateHandler {
                             )
                     )
             );
-
             botService.sendEditMessage(telegramUser,
                     EditMessageText.builder()
                             .chatId(String.valueOf(telegramUser.getChatId()))

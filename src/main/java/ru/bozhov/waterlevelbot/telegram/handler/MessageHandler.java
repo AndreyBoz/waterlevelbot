@@ -61,7 +61,7 @@ public class MessageHandler implements TelegramHandler {
 
                 Sensor sensor = selectionUtil.getSelection(user.getChatId());
                 sensor.setAddress(addr);
-                sensor.setSensorStatus(SensorStatus.GET_DATA);
+                sensor.setSensorStatus(SensorStatus.AWAITING_REQUEST);
                 sensorService.editSensorAddress(sensor, addr, user);
 
 

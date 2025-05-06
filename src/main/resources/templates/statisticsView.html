@@ -2,15 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <!-- Meta-тег для адаптивности на мобильных устройствах -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Статистика сенсора</title>
-    <!-- Подключаем Chart.js (UMD версия) -->
+    <!-- Chart.js UMD -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
-    <!-- Подключаем совместимую версию плагина chartjs-plugin-zoom (UMD версия) -->
+    <!-- chartjs-plugin-zoom UMD -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0/dist/chartjs-plugin-zoom.umd.min.js"></script>
     <style>
-        /* Общие стили для страницы */
         body {
             font-family: Arial, sans-serif;
             background: #f7f7f7;
@@ -32,7 +30,6 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        /* Стили для формы и кнопок */
         form {
             text-align: center;
             margin-bottom: 20px;
@@ -56,7 +53,6 @@
         .button-group button:hover {
             background: #2980b9;
         }
-        /* Таблица: убрали min-width, добавили overflow-x в обёртке */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -76,7 +72,6 @@
             background: #3498db;
             color: #fff;
         }
-        /* Стили для блоков с графиками */
         .charts {
             display: flex;
             flex-direction: column;
@@ -99,7 +94,6 @@
             width: 100% !important;
             height: 100% !important;
         }
-        /* Стили для кнопок зума */
         .zoom-buttons {
             position: absolute;
             bottom: 10px;
@@ -116,13 +110,11 @@
             cursor: pointer;
             font-size: 14px;
         }
-        /* Сообщения об ошибках */
         .error {
             color: red;
             text-align: center;
             margin-bottom: 20px;
         }
-        /* Медиазапрос для узких экранов */
         @media (max-width: 480px) {
             .button-group button {
                 font-size: 14px;
@@ -135,12 +127,12 @@
 <div class="container">
     <h1>Статистика для сенсора: <span th:text="${sensorName}">Sensor Name</span></h1>
     <h2>Период: <span th:text="${period}">day</span></h2>
+    <h2>Текущее время датчика: <span th:text="${sensorCurrentTime}">–</span></h2>
 
     <div th:if="${error}" class="error">
         <p th:text="${error}"></p>
     </div>
 
-    <!-- Форма для выбора периода -->
     <form th:action="@{/statistics}" method="get">
         <input type="hidden" name="sensorName" th:value="${sensorName}" />
         <div class="button-group">
@@ -184,7 +176,6 @@
 
         <h3>Графики параметров по времени</h3>
         <div class="charts">
-            <!-- График уровня воды с кнопками зума -->
             <div class="chart-container">
                 <canvas id="waterLevelChart"></canvas>
                 <div class="zoom-buttons">
@@ -193,7 +184,6 @@
                     <button onclick="resetZoom('waterLevelChart')">&#8634;</button>
                 </div>
             </div>
-            <!-- График температуры с кнопками зума -->
             <div class="chart-container">
                 <canvas id="temperatureChart"></canvas>
                 <div class="zoom-buttons">
@@ -202,7 +192,6 @@
                     <button onclick="resetZoom('temperatureChart')">&#8634;</button>
                 </div>
             </div>
-            <!-- График влажности с кнопками зума -->
             <div class="chart-container">
                 <canvas id="humidityChart"></canvas>
                 <div class="zoom-buttons">
@@ -217,64 +206,34 @@
 
 <script th:inline="javascript">
     var sensorData = /*[[${sensorData}]]*/ [];
-    var labels = sensorData.map(function(d) {
-        return d.localDateTime.substring(0, 16);
-    });
+    var labels = sensorData.map(function(d) { return d.localDateTime.substring(0, 16); });
     var waterLevels = sensorData.map(function(d) { return d.waterLevel; });
     var temperatures = sensorData.map(function(d) { return d.temperature; });
     var humidities = sensorData.map(function(d) { return d.humidity; });
 
-    // Объект для хранения созданных графиков
     var charts = {};
 
-    // Функция для создания графика с поддержкой зума и панорамирования
-    function createChart(canvasId, label, data, borderColor) {
+    function createChart(canvasId, label, data) {
         var ctx = document.getElementById(canvasId).getContext('2d');
         var chart = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: label,
-                    data: data,
-                    borderWidth: 2,
-                    borderColor: borderColor,
-                    fill: false
-                }]
-            },
+            data: { labels: labels, datasets: [{ label: label, data: data, borderWidth: 2, fill: false }] },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: {
-                        title: { display: true, text: 'Время' }
-                    },
-                    y: {
-                        title: { display: true, text: label }
-                    }
+                    x: { title: { display: true, text: 'Время' } },
+                    y: { title: { display: true, text: label } }
                 },
-                plugins: {
-                    zoom: {
-                        pan: {
-                            enabled: true,
-                            mode: 'x'
-                        },
-                        zoom: {
-                            wheel: { enabled: true },
-                            pinch: { enabled: true },
-                            mode: 'x'
-                        }
-                    }
-                }
+                plugins: { zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } } }
             }
         });
         charts[canvasId] = chart;
     }
 
-    // Функция для изменения масштаба графика
     function zoomChart(chart, factor) {
         var xScale = chart.scales.x;
-        if (chart.options.scales.x.min === undefined || chart.options.scales.x.max === undefined) {
+        if (chart.options.scales.x.min === undefined) {
             chart.options.scales.x.min = xScale.min;
             chart.options.scales.x.max = xScale.max;
         }
@@ -288,24 +247,13 @@
         chart.update();
     }
 
-    function zoomIn(canvasId) {
-        zoomChart(charts[canvasId], 0.8); // уменьшение диапазона на 20%
-    }
+    function zoomIn(id) { zoomChart(charts[id], 0.8); }
+    function zoomOut(id) { zoomChart(charts[id], 1.5); }
+    function resetZoom(id) { charts[id].resetZoom(); }
 
-    function zoomOut(canvasId) {
-        zoomChart(charts[canvasId], 1.5); // увеличение диапазона на 50%
-    }
-
-    function resetZoom(canvasId) {
-        var chart = charts[canvasId];
-        chart.resetZoom();
-    }
-
-    // Создаём графики
-    createChart('waterLevelChart', 'Уровень воды', waterLevels, 'rgba(54, 162, 235, 1)');
-    createChart('temperatureChart', 'Температура', temperatures, 'rgba(255, 99, 132, 1)');
-    createChart('humidityChart', 'Влажность', humidities, 'rgba(75, 192, 192, 1)');
-    /*]]>*/
+    createChart('waterLevelChart', 'Уровень воды', waterLevels);
+    createChart('temperatureChart', 'Температура', temperatures);
+    createChart('humidityChart', 'Влажность', humidities);
 </script>
 </body>
 </html>

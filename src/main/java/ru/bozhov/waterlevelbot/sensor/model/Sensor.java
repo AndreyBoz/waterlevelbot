@@ -60,6 +60,9 @@ public class Sensor {
     @Column(name = "normal_level")
     private Float normalLevel;
 
+    @Column(name = "time_zone", nullable = true)
+    private String timeZone;
+
     /**
      * Пользователи, подписанные на уведомления от датчика
      */

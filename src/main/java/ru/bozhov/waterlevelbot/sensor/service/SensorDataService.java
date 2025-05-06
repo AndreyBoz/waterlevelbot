@@ -24,6 +24,7 @@ import ru.bozhov.waterlevelbot.telegram.service.TelegramUserService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
@@ -46,14 +47,15 @@ public class SensorDataService {
         Optional<Sensor> optionalSensor = sensorRepository.findSensorBySensorName(sensorData.getSensorName());
 
         if (optionalSensor.isPresent()) {
-            if (optionalSensor.get().getSensorStatus().equals(SensorStatus.GET_DATA)) {
+            Sensor sensor = optionalSensor.get();
+            if (optionalSensor.get().getSensorStatus().equals(SensorStatus.GET_DATA) && Objects.equals(sensor.getTimeZone(),sensor.getTimeZone())) {
                 return ResponseEntity.ok(SensorRegResponse.fromMessage(getCurrentTime()));
             }
+            sensor.setSensorStatus(SensorStatus.GET_DATA);
+            sensor.setTimeZone(sensor.getTimeZone());
+            sensorRepository.save(sensor);
 
-            return null;
-            /*return telegramService.sendSuccessRegisterMessage(optionalSensor.get()) ?
-                    successRegistration(optionalSensor.get()) :
-                    ResponseEntity.badRequest().body(SensorRegResponse.fromMessage("ERROR"));*/
+            return ResponseEntity.ok().build();
         }
 
         return ResponseEntity.badRequest().body(SensorRegResponse.fromMessage("ERROR"));

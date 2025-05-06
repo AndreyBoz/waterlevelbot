@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import ru.bozhov.waterlevelbot.sensor.model.Sensor;
 import ru.bozhov.waterlevelbot.sensor.model.SensorData;
+import ru.bozhov.waterlevelbot.sensor.model.SensorStatus;
 import ru.bozhov.waterlevelbot.sensor.repository.SensorDataRepository;
 import ru.bozhov.waterlevelbot.sensor.service.SensorService;
 
-import java.time.LocalDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-
 
 @Controller
 @AllArgsConstructor
@@ -23,133 +24,107 @@ public class StatisticsController {
     private final SensorService sensorService;
     private final SensorDataRepository sensorDataRepository;
 
-    /**
-     * Отображает страницу статистики для выбранного сенсора с дефолтным периодом (day).
-     * На странице будут кнопки для выбора другого периода.
-     */
     @GetMapping("/statistics")
-    public ModelAndView showStatisticsForm(@RequestParam(value = "sensorName", required = false) String sensorName) {
+    public ModelAndView showStatisticsForm(
+            @RequestParam(value = "sensorName", required = false) String sensorName) {
         ModelAndView mav = new ModelAndView("statisticsView");
-
         if (sensorName == null || sensorName.isEmpty()) {
             mav.addObject("error", "Параметр sensorName не задан.");
             return mav;
         }
-
-        Optional<Sensor> sensorOptional = sensorService.findSensorBySensorName(sensorName);
-        if (!sensorOptional.isPresent()) {
-            mav.addObject("error", "Сенсор с именем " + sensorName + " не найден.");
+        Optional<Sensor> opt = sensorService.findSensorBySensorName(sensorName);
+        if (opt.isEmpty()) {
+            mav.addObject("error", "Датчик с именем " + sensorName + " не найден.");
             return mav;
         }
-
-        // По умолчанию отображаем статистику за день
-        return prepareStatisticsView(sensorOptional.get(), "day");
+        if(!opt.get().getSensorStatus().equals(SensorStatus.GET_DATA)){
+            mav.addObject("error", "Датчик с именем " + sensorName + " не принимает данные.");
+            return mav;
+        }
+        return prepareStatisticsView(opt.get(), "day");
     }
 
-    /**
-     * Обрабатывает POST-запрос с выбранным периодом.
-     * Форма на странице statisticsView.html отправляет sensorName и выбранный period.
-     */
     @PostMapping("/statistics")
     public ModelAndView filterStatistics(
             @RequestParam("sensorName") String sensorName,
-            @RequestParam("period") String period) {
-
-        Optional<Sensor> sensorOptional = sensorService.findSensorBySensorName(sensorName);
-        if (!sensorOptional.isPresent()) {
+            @RequestParam("period")     String period) {
+        Optional<Sensor> opt = sensorService.findSensorBySensorName(sensorName);
+        if (opt.isEmpty()) {
             ModelAndView mav = new ModelAndView("statisticsView");
             mav.addObject("error", "Сенсор с именем " + sensorName + " не найден.");
             return mav;
         }
-        return prepareStatisticsView(sensorOptional.get(), period);
+        if(!opt.get().getSensorStatus().equals(SensorStatus.GET_DATA)){
+            ModelAndView mav = new ModelAndView("statisticsView");
+            mav.addObject("error", "Датчик с именем " + sensorName + " не принимает данные.");
+            return mav;
+        }
+        return prepareStatisticsView(opt.get(), period);
     }
 
-    /**
-     * Вспомогательный метод для подготовки данных и создания модели для отображения статистики.
-     */
     private ModelAndView prepareStatisticsView(Sensor sensor, String period) {
-        // Используйте имя представления, которое не конфликтует с URL, например "statisticsView"
         ModelAndView mav = new ModelAndView("statisticsView");
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start;
 
+        ZoneId zone = ZoneId.of(sensor.getTimeZone());
+
+        ZonedDateTime nowZ = ZonedDateTime.now(zone);
+        ZonedDateTime startZ;
         switch (period.toLowerCase()) {
-            case "week":
-                start = now.minusWeeks(1);
-                break;
-            case "month":
-                start = now.minusMonths(1);
-                break;
-            case "year":
-                start = now.minusYears(1);
-                break;
+            case "week":  startZ = nowZ.minusWeeks(1);  break;
+            case "month": startZ = nowZ.minusMonths(1); break;
+            case "year":  startZ = nowZ.minusYears(1);  break;
             case "day":
-            default:
-                start = now.minusDays(1);
+            default:      startZ = nowZ.minusDays(1);   break;
         }
 
-        List<SensorData> sensorData = sensorDataRepository.findBySensorAndLocalDateTimeBetween(sensor, start, now);
-        if (sensorData.isEmpty()) {
-            mav.addObject("error", "Нет данных для сенсора " + sensor.getSensorName() + " за выбранный период.");
+        LocalDateTime now    = nowZ.toLocalDateTime();
+        LocalDateTime start  = startZ.toLocalDateTime();
+
+        List<SensorData> data = sensorDataRepository
+                .findBySensorAndLocalDateTimeBetween(sensor, start, now);
+        if (data.isEmpty()) {
+            mav.addObject("error", "Нет данных для сенсора "
+                    + sensor.getSensorName() + " за выбранный период.");
             return mav;
         }
 
-        // Агрегированные показатели для уровня воды
-        double avgWaterLevel = sensorData.stream()
-                .mapToDouble(SensorData::getWaterLevel)
-                .average().orElse(0);
-        double maxWaterLevel = sensorData.stream()
-                .mapToDouble(SensorData::getWaterLevel)
-                .max().orElse(0);
-        double minWaterLevel = sensorData.stream()
-                .mapToDouble(SensorData::getWaterLevel)
-                .min().orElse(0);
+        double avgWL = data.stream().mapToDouble(SensorData::getWaterLevel).average().orElse(0);
+        double maxWL = data.stream().mapToDouble(SensorData::getWaterLevel).max().orElse(0);
+        double minWL = data.stream().mapToDouble(SensorData::getWaterLevel).min().orElse(0);
 
-        // Для температуры (учитывая, что поле может быть null)
-        double avgTemperature = sensorData.stream()
-                .filter(d -> d.getTemperature() != null)
-                .mapToDouble(SensorData::getTemperature)
-                .average().orElse(0);
-        double maxTemperature = sensorData.stream()
-                .filter(d -> d.getTemperature() != null)
-                .mapToDouble(SensorData::getTemperature)
-                .max().orElse(0);
-        double minTemperature = sensorData.stream()
-                .filter(d -> d.getTemperature() != null)
-                .mapToDouble(SensorData::getTemperature)
-                .min().orElse(0);
+        double avgT = data.stream().filter(d -> d.getTemperature() != null)
+                .mapToDouble(SensorData::getTemperature).average().orElse(0);
+        double maxT = data.stream().filter(d -> d.getTemperature() != null)
+                .mapToDouble(SensorData::getTemperature).max().orElse(0);
+        double minT = data.stream().filter(d -> d.getTemperature() != null)
+                .mapToDouble(SensorData::getTemperature).min().orElse(0);
 
-        // Для влажности
-        double avgHumidity = sensorData.stream()
-                .filter(d -> d.getHumidity() != null)
-                .mapToDouble(SensorData::getHumidity)
-                .average().orElse(0);
-        double maxHumidity = sensorData.stream()
-                .filter(d -> d.getHumidity() != null)
-                .mapToDouble(SensorData::getHumidity)
-                .max().orElse(0);
-        double minHumidity = sensorData.stream()
-                .filter(d -> d.getHumidity() != null)
-                .mapToDouble(SensorData::getHumidity)
-                .min().orElse(0);
+        double avgH = data.stream().filter(d -> d.getHumidity() != null)
+                .mapToDouble(SensorData::getHumidity).average().orElse(0);
+        double maxH = data.stream().filter(d -> d.getHumidity() != null)
+                .mapToDouble(SensorData::getHumidity).max().orElse(0);
+        double minH = data.stream().filter(d -> d.getHumidity() != null)
+                .mapToDouble(SensorData::getHumidity).min().orElse(0);
 
-        // Передаем данные в модель
-        mav.addObject("sensorData", sensorData);
-        mav.addObject("avgWaterLevel", avgWaterLevel);
-        mav.addObject("maxWaterLevel", maxWaterLevel);
-        mav.addObject("minWaterLevel", minWaterLevel);
+        mav.addObject("sensorData", data);
+        mav.addObject("avgWaterLevel", avgWL);
+        mav.addObject("maxWaterLevel", maxWL);
+        mav.addObject("minWaterLevel", minWL);
 
-        mav.addObject("avgTemperature", avgTemperature);
-        mav.addObject("maxTemperature", maxTemperature);
-        mav.addObject("minTemperature", minTemperature);
+        mav.addObject("avgTemperature", avgT);
+        mav.addObject("maxTemperature", maxT);
+        mav.addObject("minTemperature", minT);
 
-        mav.addObject("avgHumidity", avgHumidity);
-        mav.addObject("maxHumidity", maxHumidity);
-        mav.addObject("minHumidity", minHumidity);
+        mav.addObject("avgHumidity", avgH);
+        mav.addObject("maxHumidity", maxH);
+        mav.addObject("minHumidity", minH);
 
         mav.addObject("sensorName", sensor.getSensorName());
         mav.addObject("period", period);
+
+        String fmt = nowZ.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"));
+        mav.addObject("sensorCurrentTime", fmt);
+
         return mav;
     }
-
 }

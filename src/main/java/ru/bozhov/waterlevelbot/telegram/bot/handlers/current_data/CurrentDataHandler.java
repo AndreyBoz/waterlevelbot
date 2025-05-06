@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.bozhov.waterlevelbot.sensor.model.Sensor;
 import ru.bozhov.waterlevelbot.sensor.model.SensorData;
+import ru.bozhov.waterlevelbot.sensor.model.SensorStatus;
 import ru.bozhov.waterlevelbot.sensor.service.SensorDataService;
 import ru.bozhov.waterlevelbot.telegram.bot.BotStateHandler;
 import ru.bozhov.waterlevelbot.telegram.bot.util.SensorSelectionUtil;
@@ -48,22 +49,26 @@ public class CurrentDataHandler implements BotStateHandler {
 
         Sensor selected = selectionUtil.getSelection(telegramUser.getChatId());
         if (selected != null) {
-            SensorData data = dataService.getLastMeasure(selected);
+            String prompt = "Датчик не готов к приёму данных.";
+            if (selected.getSensorStatus().equals(SensorStatus.GET_DATA)){
+                prompt = "Данных пока что нет.";
+                SensorData data = dataService.getLastMeasure(selected);
 
-            String prompt = "Данных пока что нет.";
-            if(data==null) {
-                prompt = String.format(
-                        "✅ Последние данные для датчика \"%s\" (ID %d):\n" +
-                                "💧 Уровень воды: %.2f м\n" +
-                                "🌡 Температура: %s°C\n" +
-                                "💦 Влажность: %s%%\n" +
-                                "⏰ Время измерения: %s",
-                        selected.getSensorName(), selected.getId(),
-                        data.getWaterLevel(),
-                        data.getTemperature() != null ? String.format("%.2f", data.getTemperature()) : "N/A",
-                        data.getHumidity() != null ? String.format("%.2f", data.getHumidity()) : "N/A",
-                        data.getLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                );
+
+                if(data==null) {
+                    prompt = String.format(
+                            "✅ Последние данные для датчика \"%s\" (ID %d):\n" +
+                                    "💧 Уровень воды: %.2f м\n" +
+                                    "🌡 Температура: %s°C\n" +
+                                    "💦 Влажность: %s%%\n" +
+                                    "⏰ Время измерения: %s",
+                            selected.getSensorName(), selected.getId(),
+                            data.getWaterLevel(),
+                            data.getTemperature() != null ? String.format("%.2f", data.getTemperature()) : "N/A",
+                            data.getHumidity() != null ? String.format("%.2f", data.getHumidity()) : "N/A",
+                            data.getLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    );
+                }
             }
 
             InlineKeyboardMarkup cancelMarkup = new InlineKeyboardMarkup(

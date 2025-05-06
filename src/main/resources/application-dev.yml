@@ -14,7 +14,7 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: jdbc:postgresql://localhost:5430/water_level_bot
+    url: jdbc:postgresql://213.176.67.231:5430/water_level_bot
     password: postgres
     username: postgres
   jpa:
