@@ -39,6 +39,12 @@ public class StatisticsHandler implements BotStateHandler {
     @Override
     public void handle(Update update, TelegramUser telegramUser) {
         String callback = update.getCallbackQuery().getData();
+
+        AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
+                .callbackQueryId(update.getCallbackQuery().getId())
+                .build();
+        botService.executeAnswerCallback(answer);
+
         int messageId = update.getCallbackQuery().getMessage().getMessageId();
 
         EditMessageText edit = selectionUtil.handleSelection(update, callback, messageId);
@@ -78,11 +84,6 @@ public class StatisticsHandler implements BotStateHandler {
                             .replyMarkup(cancelMarkup)
                             .build()
             );
-
-            AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
-                    .callbackQueryId(update.getCallbackQuery().getId())
-                    .build();
-            botService.executeAnswerCallback(answer);
 
             telegramUserService.changeBotState(telegramUser, BotState.IDLE);
         }

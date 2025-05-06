@@ -39,6 +39,12 @@ public class CurrentDataHandler implements BotStateHandler {
     @Override
     public void handle(Update update, TelegramUser telegramUser) {
         String callback = update.getCallbackQuery().getData();
+
+        AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
+                .callbackQueryId(update.getCallbackQuery().getId())
+                .build();
+        botService.executeAnswerCallback(answer);
+
         int messageId = update.getCallbackQuery().getMessage().getMessageId();
 
         // Обработка выбора датчика
@@ -91,11 +97,6 @@ public class CurrentDataHandler implements BotStateHandler {
                             .replyMarkup(cancelMarkup)
                             .build()
             );
-
-            AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
-                    .callbackQueryId(update.getCallbackQuery().getId())
-                    .build();
-            botService.executeAnswerCallback(answer);
 
             telegramUserService.changeBotState(telegramUser, BotState.IDLE);
         }
