@@ -43,20 +43,24 @@ public class CallbackHandler implements TelegramHandler {
         Optional<TelegramUser> userOptional = telegramUserService.findUserByChatId(chatId);
         AnswerCallbackQuery answer = null;
 
-        if(userOptional.isEmpty()){
-           botService.sendMessage(telegramService.registerTelegramUser(chatId, update.getCallbackQuery().getFrom().getUserName()));
+        if (userOptional.isEmpty()) {
+            botService.sendMessage(telegramService.registerTelegramUser(chatId, update.getCallbackQuery().getFrom().getUserName()));
+            answer = AnswerCallbackQuery.builder()
+                    .callbackQueryId(update.getCallbackQuery().getId())
+                    .build();
+            botService.executeAnswerCallback(answer);
         }
 
         TelegramUser user = userOptional.get();
 
         int messageId = update.getCallbackQuery().getMessage().getMessageId();
-        if(callbackData.equals("GO_BACK")) {
+        if (callbackData.equals("GO_BACK")) {
             botService.sendEditMessage(user, CallBackMessages.getWelcomeMessage(chatId, messageId, user.getUserName()));
             telegramUserService.changeBotState(user, BotState.IDLE);
             return;
         }
 
-        if(user.getBotState().equals(BotState.IDLE.toString())) {
+        if (user.getBotState().equals(BotState.IDLE.toString())) {
             String newText = null;
             switch (callbackData) {
                 case "REGISTER_SENSOR":
@@ -142,7 +146,7 @@ public class CallbackHandler implements TelegramHandler {
         botStateService.handleUpdateByBotState(update, user);
     }
 
-    public SendMessage errorMessage(Update update){
+    public SendMessage errorMessage(Update update) {
         SendMessage message = new SendMessage();
         message.setChatId(update.getMessage().getChatId());
         message.setText("Ошибка, такой команды не существует.");
