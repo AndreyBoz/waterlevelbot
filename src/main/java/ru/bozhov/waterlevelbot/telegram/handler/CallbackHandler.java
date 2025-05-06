@@ -41,14 +41,14 @@ public class CallbackHandler implements TelegramHandler {
         String callbackData = update.getCallbackQuery().getData();
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
         Optional<TelegramUser> userOptional = telegramUserService.findUserByChatId(chatId);
-        AnswerCallbackQuery answer = null;
+
+        AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
+                .callbackQueryId(update.getCallbackQuery().getId())
+                .build();
+        botService.executeAnswerCallback(answer);
 
         if (userOptional.isEmpty()) {
             botService.sendMessage(telegramService.registerTelegramUser(chatId, update.getCallbackQuery().getFrom().getUserName()));
-            answer = AnswerCallbackQuery.builder()
-                    .callbackQueryId(update.getCallbackQuery().getId())
-                    .build();
-            botService.executeAnswerCallback(answer);
         }
 
         TelegramUser user = userOptional.get();
@@ -65,80 +65,41 @@ public class CallbackHandler implements TelegramHandler {
             switch (callbackData) {
                 case "REGISTER_SENSOR":
                     botService.sendEditMessage(user, CallBackMessages.getRegisterSensorMessage(chatId, messageId, telegramService.registerSensorCallback(user)));
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     return;
                 case "SHOW_STATS":
                     selectionUtil.clearState(chatId);
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     telegramUserService.changeBotState(user, BotState.STATISTICS);
                     break;
                 case "EDIT_SENSOR_ADDRESS":
                     selectionUtil.clearState(chatId);
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     telegramUserService.changeBotState(user, BotState.EDIT_SENSOR_ADDRESS);
                     break;
                 case "SET_NORMAL_LEVEL":
                     selectionUtil.clearState(chatId);
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
+
                     telegramUserService.changeBotState(user, BotState.SET_NORMAL_LEVEL);
                     break;
                 case "SUBSCRIBE_SENSOR":
                     selectionUtil.clearState(chatId);
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     telegramUserService.changeBotState(user, BotState.SUBSCRIBE_SENSOR);
                     break;
                 case "SET_GEOLOCATION":
                     selectionUtil.clearState(chatId);
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     telegramUserService.changeBotState(user, BotState.SET_GEOLOCATION);
                     break;
                 case "VIEW_MAP":
                     selectionUtil.clearState(chatId);
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     telegramUserService.changeBotState(user, BotState.VIEW_MAP);
                     break;
                 case "SHOW_HELP":
                     botService.sendEditMessage(user, CallBackMessages.getHelpMessage(chatId, messageId));
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     return;
                 case "SHOW_DATA":
                     selectionUtil.clearState(chatId);
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     telegramUserService.changeBotState(user, BotState.CURRENT_DATA);
                     break;
                 default:
                     botService.sendMessage(errorMessage(update));
-                    answer = AnswerCallbackQuery.builder()
-                            .callbackQueryId(update.getCallbackQuery().getId())
-                            .build();
-                    botService.executeAnswerCallback(answer);
                     return;
             }
         }
