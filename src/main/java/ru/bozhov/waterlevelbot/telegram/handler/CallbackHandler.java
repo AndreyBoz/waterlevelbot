@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.bozhov.waterlevelbot.telegram.bot.BotStateService;
 import ru.bozhov.waterlevelbot.telegram.bot.util.SensorSelectionUtil;
@@ -55,7 +54,7 @@ public class CallbackHandler implements TelegramHandler {
 
         int messageId = update.getCallbackQuery().getMessage().getMessageId();
         if (callbackData.equals("GO_BACK")) {
-            botService.sendEditMessage(user, CallBackMessages.getWelcomeMessage(chatId, messageId, user.getUserName()));
+            botService.sendEditMessage(user, CallBackMessages.getWelcomeEditMessage(chatId, messageId, user.getUserName()));
             telegramUserService.changeBotState(user, BotState.IDLE);
             return;
         }

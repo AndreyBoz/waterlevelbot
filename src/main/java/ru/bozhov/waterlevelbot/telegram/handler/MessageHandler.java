@@ -8,9 +8,9 @@ import ru.bozhov.waterlevelbot.sensor.model.Coordinate;
 import ru.bozhov.waterlevelbot.sensor.model.Sensor;
 import ru.bozhov.waterlevelbot.sensor.model.SensorAddress;
 import ru.bozhov.waterlevelbot.sensor.model.SensorStatus;
-import ru.bozhov.waterlevelbot.sensor.repository.SensorRepository;
 import ru.bozhov.waterlevelbot.sensor.service.SensorService;
 import ru.bozhov.waterlevelbot.telegram.bot.util.SensorSelectionUtil;
+import ru.bozhov.waterlevelbot.telegram.messages.CallBackMessages;
 import ru.bozhov.waterlevelbot.telegram.model.BotState;
 import ru.bozhov.waterlevelbot.telegram.model.TelegramUser;
 import ru.bozhov.waterlevelbot.telegram.service.BotService;
@@ -53,6 +53,11 @@ public class MessageHandler implements TelegramHandler {
         }
 
         TelegramUser user = userOptional.get();
+
+        if(update.getMessage().getText().equals("/start")){
+            telegramUserService.changeBotState(user, BotState.IDLE);
+            return CallBackMessages.getWelcomeMessage(chatId, user.getUserName());
+        }
 
         if(user.getBotState().equals(BotState.SENSOR_EDIT_ACCEPT.toString())){
             String text = update.getMessage().getText();

@@ -1,6 +1,7 @@
 package ru.bozhov.waterlevelbot.telegram.messages;
 
 import lombok.experimental.UtilityClass;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import ru.bozhov.waterlevelbot.telegram.utils.SendMessageUtils;
 
@@ -21,13 +22,20 @@ public class CallBackMessages {
                 .build();
     }
 
-    public EditMessageText getWelcomeMessage(Long chatId, int messageId, String username){
+    public EditMessageText getWelcomeEditMessage(Long chatId, int messageId, String username){
         return EditMessageText.builder()
                 .chatId(String.valueOf(chatId))
                 .messageId(messageId)
                 .text(String.format(HELLO_MESSAGE, username))
                 .replyMarkup(SendMessageUtils.getStartMenuInline())
                 .build();
+    }
+
+    public SendMessage getWelcomeMessage(Long chatId, String username){
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText(String.format(HELLO_MESSAGE, username));
+        return message;
     }
 
     public EditMessageText getRegisterSensorMessage(Long chatId, int messageId, String sensorName){
