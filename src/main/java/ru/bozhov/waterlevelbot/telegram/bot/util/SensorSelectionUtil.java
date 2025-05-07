@@ -73,7 +73,7 @@ public class SensorSelectionUtil {
         rows.add(Collections.singletonList(
                 InlineKeyboardButton.builder()
                         .text("Отмена")
-                        .callbackData("G0")
+                        .callbackData("GO_BACK")
                         .build()
         ));
         return new InlineKeyboardMarkup(rows);
