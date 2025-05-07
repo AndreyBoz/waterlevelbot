@@ -19,9 +19,6 @@ public class BotStateService {
     }
 
     public void handleUpdateByBotState(Update update, TelegramUser telegramUser) {
-        if(update.getMessage()==null)
-            return;
-
         for (var handler : botStateHandlers) {
             if (handler.matches(telegramUser)) {
                 try {
