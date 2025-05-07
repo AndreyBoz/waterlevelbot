@@ -62,7 +62,7 @@ public class CurrentDataHandler implements BotStateHandler {
                 SensorData data = dataService.getLastMeasure(selected);
 
 
-                if(data==null) {
+                if(data!=null) {
                     prompt = String.format(
                             "✅ Последние данные для датчика \"%s\" (ID %d):\n" +
                                     "💧 Уровень воды: %.2f м\n" +

@@ -40,7 +40,7 @@ public class SensorSelectionUtil {
     Set<String> startCommands = Set.of(
             "EDIT_SENSOR_ADDRESS",
             "SHOW_STATS",
-            "CURRENT_DATA",
+            "SHOW_DATA",
             "VIEW_MAP",
             "SET_GEOLOCATION",
             "SET_NORMAL_LEVEL",
