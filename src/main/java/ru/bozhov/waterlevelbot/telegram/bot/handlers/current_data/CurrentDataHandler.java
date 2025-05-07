@@ -51,7 +51,6 @@ public class CurrentDataHandler implements BotStateHandler {
         EditMessageText edit = selectionUtil.handleSelection(update, callback, messageId);
         if (edit != null) {
             botService.sendEditMessage(telegramUser, edit);
-            return;
         }
 
         Sensor selected = selectionUtil.getSelection(telegramUser.getChatId());
