@@ -76,7 +76,6 @@ public class CallbackHandler implements TelegramHandler {
                     break;
                 case "SET_NORMAL_LEVEL":
                     selectionUtil.clearState(chatId);
-
                     telegramUserService.changeBotState(user, BotState.SET_NORMAL_LEVEL);
                     break;
                 case "SUBSCRIBE_SENSOR":
@@ -99,6 +98,7 @@ public class CallbackHandler implements TelegramHandler {
                     telegramUserService.changeBotState(user, BotState.CURRENT_DATA);
                     break;
                 default:
+                    telegramUserService.changeBotState(user, BotState.IDLE);
                     botService.sendMessage(errorMessage(update));
                     return;
             }
