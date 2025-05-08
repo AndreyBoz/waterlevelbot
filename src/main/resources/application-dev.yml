@@ -3,7 +3,7 @@ server:
   address: 0.0.0.0
 
 telegram:
-  webhook-path: https://0f00-2a01-e5c0-4614-00-2.ngrok-free.app/webhook
+  webhook-path: https://d049-2a01-e5c0-4614-00-2.ngrok-free.app/webhook
   bot-name: WaterGuardBot
   bot-token: 7753531757:AAF8CI7_GVs-i4SIHYqun9tyP5U998E-H3c
 
@@ -31,4 +31,4 @@ yandex:
 
 
 domain:
-  url: https://0f00-2a01-e5c0-4614-00-2.ngrok-free.app/statistics
+  url: https://d049-2a01-e5c0-4614-00-2.ngrok-free.app/statistics

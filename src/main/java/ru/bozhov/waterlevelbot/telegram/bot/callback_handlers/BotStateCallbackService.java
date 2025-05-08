@@ -1,4 +1,4 @@
-package ru.bozhov.waterlevelbot.telegram.bot;
+package ru.bozhov.waterlevelbot.telegram.bot.callback_handlers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,16 +10,16 @@ import java.util.Vector;
 
 @Slf4j
 @Service
-public class BotStateService {
+public class BotStateCallbackService {
 
-    private final Vector<BotStateHandler> botStateHandlers;
+    private final Vector<BotStateCallbackHandler> botStateCallbackHandlers;
 
-    public BotStateService(List<BotStateHandler> handlers) {
-        this.botStateHandlers = new Vector<>(handlers);
+    public BotStateCallbackService(List<BotStateCallbackHandler> handlers) {
+        this.botStateCallbackHandlers = new Vector<>(handlers);
     }
 
     public void handleUpdateByBotState(Update update, TelegramUser telegramUser) {
-        for (var handler : botStateHandlers) {
+        for (var handler : botStateCallbackHandlers) {
             if (handler.matches(telegramUser)) {
                 try {
                     handler.handle(update, telegramUser);

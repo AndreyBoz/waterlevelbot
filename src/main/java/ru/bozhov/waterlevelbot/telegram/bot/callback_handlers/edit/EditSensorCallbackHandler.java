@@ -1,17 +1,15 @@
-package ru.bozhov.waterlevelbot.telegram.bot.handlers.edit;
+package ru.bozhov.waterlevelbot.telegram.bot.callback_handlers.edit;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.bozhov.waterlevelbot.sensor.model.Sensor;
 import ru.bozhov.waterlevelbot.sensor.repository.SensorRepository;
-import ru.bozhov.waterlevelbot.telegram.bot.BotStateHandler;
+import ru.bozhov.waterlevelbot.telegram.bot.callback_handlers.BotStateCallbackHandler;
 import ru.bozhov.waterlevelbot.telegram.bot.util.SensorSelectionUtil;
 import ru.bozhov.waterlevelbot.telegram.model.BotState;
 import ru.bozhov.waterlevelbot.telegram.model.TelegramUser;
@@ -23,7 +21,7 @@ import java.util.Collections;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class EditSensorHandler implements BotStateHandler {
+public class EditSensorCallbackHandler implements BotStateCallbackHandler {
     private final BotService botService;
     private final SensorSelectionUtil selectionUtil;
     private final SensorRepository sensorRepo;

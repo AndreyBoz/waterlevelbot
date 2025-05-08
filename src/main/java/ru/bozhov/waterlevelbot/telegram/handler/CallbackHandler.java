@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.bozhov.waterlevelbot.telegram.bot.BotStateService;
+import ru.bozhov.waterlevelbot.telegram.bot.callback_handlers.BotStateCallbackService;
 import ru.bozhov.waterlevelbot.telegram.bot.util.SensorSelectionUtil;
 import ru.bozhov.waterlevelbot.telegram.messages.CallBackMessages;
 import ru.bozhov.waterlevelbot.telegram.model.BotState;
@@ -27,7 +27,7 @@ public class CallbackHandler implements TelegramHandler {
 
     BotService botService;
 
-    BotStateService botStateService;
+    BotStateCallbackService botStateCallbackService;
 
     SensorSelectionUtil selectionUtil;
 
@@ -103,7 +103,7 @@ public class CallbackHandler implements TelegramHandler {
             }
         }
 
-        botStateService.handleUpdateByBotState(update, user);
+        botStateCallbackService.handleUpdateByBotState(update, user);
     }
 
     public SendMessage errorMessage(Update update) {
