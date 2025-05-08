@@ -53,7 +53,6 @@ public class CurrentDataCallbackHandler implements BotStateCallbackHandler {
                 prompt = "Данных пока что нет.";
                 SensorData data = dataService.getLastMeasure(selected);
 
-
                 if(data!=null) {
                     prompt = String.format(
                             "✅ Последние данные для датчика \"%s\" (ID %d):\n" +
