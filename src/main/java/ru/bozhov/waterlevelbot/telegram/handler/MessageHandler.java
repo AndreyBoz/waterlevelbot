@@ -11,6 +11,7 @@ import ru.bozhov.waterlevelbot.telegram.model.TelegramUser;
 import ru.bozhov.waterlevelbot.telegram.service.TelegramService;
 import ru.bozhov.waterlevelbot.telegram.service.TelegramUserService;
 
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -39,7 +40,7 @@ public class MessageHandler implements TelegramHandler {
 
         TelegramUser user = userOpt.get();
 
-        if(update.getMessage().getText().equals("/start")){
+        if(Objects.equals(update.getMessage().getText(),"/start")){
             telegramUserService.changeBotState(user, BotState.IDLE);
             return CallBackMessages.getWelcomeMessage(chatId, user.getUserName());
         }
