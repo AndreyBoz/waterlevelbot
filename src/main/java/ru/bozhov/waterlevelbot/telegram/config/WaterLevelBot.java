@@ -5,12 +5,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.bozhov.waterlevelbot.telegram.handler.CallbackHandler;
 import ru.bozhov.waterlevelbot.telegram.handler.MessageHandler;
-import ru.bozhov.waterlevelbot.telegram.messages.CallBackMessages;
-import ru.bozhov.waterlevelbot.telegram.utils.SendMessageUtils;
 
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -35,7 +32,7 @@ public class WaterLevelBot extends TelegramWebhookBot {
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        if(callbackHandler.matches(update)){
+        if (callbackHandler.matches(update)) {
             callbackHandler.handle(update);
             return null;
         }

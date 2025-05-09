@@ -35,6 +35,7 @@ public class CallBackMessages {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(String.format(HELLO_MESSAGE, username));
+        message.setReplyMarkup(SendMessageUtils.getStartMenuInline());
         return message;
     }
 

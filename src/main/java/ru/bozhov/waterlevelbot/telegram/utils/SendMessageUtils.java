@@ -42,7 +42,7 @@ public class SendMessageUtils {
 
         // 2-я строка: настройка и помощь
         InlineKeyboardButton btnConfigure = InlineKeyboardButton.builder()
-                .text("Настроить сенсор")
+                .text("Настроить датчик")
                 .callbackData("EDIT_SENSOR_ADDRESS")
                 .build();
         InlineKeyboardButton btnHelp = InlineKeyboardButton.builder()

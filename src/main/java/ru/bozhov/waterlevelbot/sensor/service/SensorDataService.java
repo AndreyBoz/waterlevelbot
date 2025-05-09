@@ -16,7 +16,6 @@ import ru.bozhov.waterlevelbot.sensor.model.SensorData;
 import ru.bozhov.waterlevelbot.sensor.model.SensorStatus;
 import ru.bozhov.waterlevelbot.sensor.repository.SensorDataRepository;
 import ru.bozhov.waterlevelbot.sensor.repository.SensorRepository;
-import ru.bozhov.waterlevelbot.telegram.model.BotState;
 import ru.bozhov.waterlevelbot.telegram.service.BotService;
 import ru.bozhov.waterlevelbot.telegram.service.TelegramService;
 import ru.bozhov.waterlevelbot.telegram.service.TelegramUserService;
@@ -48,7 +47,7 @@ public class SensorDataService {
 
         if (optionalSensor.isPresent()) {
             Sensor sensor = optionalSensor.get();
-            if (optionalSensor.get().getSensorStatus().equals(SensorStatus.GET_DATA) && Objects.equals(sensor.getTimeZone(),sensor.getTimeZone())) {
+            if (optionalSensor.get().getSensorStatus().equals(SensorStatus.GET_DATA) && Objects.equals(sensor.getTimeZone(), sensor.getTimeZone())) {
                 return ResponseEntity.ok(SensorRegResponse.fromMessage(getCurrentTime()));
             }
             sensor.setSensorStatus(SensorStatus.GET_DATA);
@@ -67,16 +66,6 @@ public class SensorDataService {
                 .orElse(null);
     }
 
-
-    private ResponseEntity<SensorRegResponse> successRegistration(Sensor sensor) {
-        sensor.getAdmins().forEach(admin -> telegramUserService.changeBotState(admin, BotState.IDLE));
-        sensor.setSensorStatus(SensorStatus.AWAITING_LOCATION);
-
-        SensorRegResponse response = SensorRegResponse.fromMessage(getCurrentTime());
-
-        return ResponseEntity.ok(response);
-    }
-
     private String getCurrentTime() {
         return LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -90,18 +79,18 @@ public class SensorDataService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        if(isCriticalLevel(request.getWaterLevel(), sensorOpt.get())){
+        if (isCriticalLevel(request.getWaterLevel(), sensorOpt.get())) {
             botService.sendCriticalLevelMessage(sensorOpt.get(), request.getWaterLevel());
         }
 
         Sensor sensor = sensorOpt.get();
         SensorData sensorData = new SensorData();
         sensorData.setSensor(sensor);
-        if(request.getHumidity()!=null)
+        if (request.getHumidity() != null)
             sensorData.setHumidity(request.getHumidity());
-        if(request.getTemperature()!=null)
+        if (request.getTemperature() != null)
             sensorData.setTemperature(request.getTemperature());
-        if(request.getWaterLevel()!=null)
+        if (request.getWaterLevel() != null)
             sensorData.setWaterLevel(request.getWaterLevel());
 
         try {
@@ -121,8 +110,6 @@ public class SensorDataService {
     }
 
     private boolean isCriticalLevel(Float waterLevel, Sensor sensor) {
-        return sensor.getNormalLevel()!=null && sensor.getNormalLevel() > waterLevel;
+        return sensor.getNormalLevel() != null && sensor.getNormalLevel() > waterLevel;
     }
-
-
 }
