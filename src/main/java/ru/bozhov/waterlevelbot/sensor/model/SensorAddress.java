@@ -34,4 +34,35 @@ public class SensorAddress {
     @Column(name = "description")
     private String description;
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("🌊 *Информация о местоположении датчика* 🌊\n\n");
+
+        if (waterFeatureName != null && !waterFeatureName.isEmpty()) {
+            sb.append("📍 *Водный объект:* ")
+                    .append(waterFeatureType != null ? waterFeatureType + " " : "")
+                    .append("\"").append(waterFeatureName).append("\"\n");
+        }
+
+        if (localArea != null && !localArea.isEmpty()) {
+            sb.append("🏘 *Район:* ").append(localArea);
+            if (region != null && !region.isEmpty()) {
+                sb.append(" (").append(region).append(")");
+            }
+            sb.append("\n");
+        } else if (region != null && !region.isEmpty()) {
+            sb.append("🗺 *Регион:* ").append(region).append("\n");
+        }
+
+        if (nearestCity != null && !nearestCity.isEmpty()) {
+            sb.append("🏙 *Ближайший город:* ").append(nearestCity).append("\n");
+        }
+
+        if (description != null && !description.isEmpty()) {
+            sb.append("\n📝 *Описание:* ").append(description).append("\n");
+        }
+
+        return sb.toString();
+    }
 }

@@ -58,7 +58,7 @@ public class BotService {
             for(var user: sensor.getSubscribers()){
                 SendMessage message = new SendMessage();
                 message.setChatId(user.getChatId());
-                message.setText("Критический уровень воды зафиксирован на датчике: " + sensor.getSensorName() + "\n Тек. уровень: " + level);
+                message.setText("Критический уровень воды зафиксирован на датчике: " + sensor.getSensorName() + "\n Тек. уровень: " + level + "\n" + sensor.getAddress()!=null ? sensor.getAddress().toString() : "");
                 bot.execute(message);
             }
         } catch (TelegramApiException e) {
@@ -71,11 +71,13 @@ public class BotService {
             for(var user: sensor.getSubscribers()){
                 SendMessage message = new SendMessage();
                 message.setChatId(user.getChatId());
-                message.setText("Датчик сделал замер: " + sensor.getSensorName() + String.format(
+                message.setText(String.format("Датчик %s сделал замер:\n" +
                                 "💧 Уровень воды: %.2f м\n" +
                                 "🌡 Температура: %s°C\n" +
                                 "💦 Влажность: %s%%\n" +
-                                "⏰ Время измерения: %s",
+                                "⏰ Время измерения: %s\n" +
+                                sensor.getAddress()!=null ? sensor.getAddress().toString(): "",
+                        sensor.getSensorName(),
                         data.getWaterLevel(),
                         data.getTemperature() != null ? String.format("%.2f", data.getTemperature()) : "N/A",
                         data.getHumidity() != null ? String.format("%.2f", data.getHumidity()) : "N/A",

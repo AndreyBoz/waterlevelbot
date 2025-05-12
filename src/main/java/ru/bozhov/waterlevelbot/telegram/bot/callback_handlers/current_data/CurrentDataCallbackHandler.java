@@ -59,7 +59,8 @@ public class CurrentDataCallbackHandler implements BotStateCallbackHandler {
                                     "💧 Уровень воды: %.2f м\n" +
                                     "🌡 Температура: %s°C\n" +
                                     "💦 Влажность: %s%%\n" +
-                                    "⏰ Время измерения: %s",
+                                    "⏰ Время измерения: %s\n"+
+                                    selected.getAddress()!=null ? selected.getAddress().toString() : "",
                             selected.getSensorName(), selected.getId(),
                             data.getWaterLevel(),
                             data.getTemperature() != null ? String.format("%.2f", data.getTemperature()) : "N/A",
