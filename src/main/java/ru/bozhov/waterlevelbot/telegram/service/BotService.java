@@ -53,12 +53,19 @@ public class BotService {
         }
     }
 
-    public void sendCriticalLevelMessage(Sensor sensor, Float level){
+    public void sendCriticalLevelMessage(Sensor sensor, Float level) {
         try {
-            for(var user: sensor.getSubscribers()){
+            for (var user : sensor.getSubscribers()) {
                 SendMessage message = new SendMessage();
                 message.setChatId(user.getChatId());
-                message.setText("Критический уровень воды зафиксирован на датчике: " + sensor.getSensorName() + "\n Тек. уровень: " + level + "\n" + sensor.getAddress()!=null ? sensor.getAddress().toString() : "");
+
+                // Исправленный вариант с правильным форматированием
+                String messageText = "Критический уровень воды зафиксирован на датчике: " +
+                        sensor.getSensorName() +
+                        "\nТек. уровень: " + level +
+                        "\n" + (sensor.getAddress() != null ? sensor.getAddress().toString() : "");
+
+                message.setText(messageText);
                 bot.execute(message);
             }
         } catch (TelegramApiException e) {
@@ -66,23 +73,25 @@ public class BotService {
         }
     }
 
-    public void sendMessageForSubscribers(Sensor sensor, SensorData data){
+    public void sendMessageForSubscribers(Sensor sensor, SensorData data) {
         try {
-            for(var user: sensor.getSubscribers()){
+            for (var user : sensor.getSubscribers()) {
                 SendMessage message = new SendMessage();
                 message.setChatId(user.getChatId());
-                message.setText(String.format("Датчик %s сделал замер:\n" +
+                String messageText = String.format(
+                        "Датчик %s сделал замер:\n" +
                                 "💧 Уровень воды: %.2f м\n" +
                                 "🌡 Температура: %s°C\n" +
                                 "💦 Влажность: %s%%\n" +
-                                "⏰ Время измерения: %s\n" +
-                                sensor.getAddress()!=null ? sensor.getAddress().toString(): "",
+                                "⏰ Время измерения: %s\n%s",
                         sensor.getSensorName(),
                         data.getWaterLevel(),
                         data.getTemperature() != null ? String.format("%.2f", data.getTemperature()) : "N/A",
                         data.getHumidity() != null ? String.format("%.2f", data.getHumidity()) : "N/A",
-                        data.getLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        data.getLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                        sensor.getAddress() != null ? sensor.getAddress().toString() : ""
                 );
+                message.setText(messageText);
                 bot.execute(message);
             }
         } catch (TelegramApiException e) {

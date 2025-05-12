@@ -49,23 +49,25 @@ public class CurrentDataCallbackHandler implements BotStateCallbackHandler {
         Sensor selected = selectionUtil.getSelection(telegramUser.getChatId());
         if (selected != null) {
             String prompt = "Датчик не готов к приёму данных.";
-            if (selected.getSensorStatus().equals(SensorStatus.GET_DATA)){
+            if (selected.getSensorStatus().equals(SensorStatus.GET_DATA)) {
                 prompt = "Данных пока что нет.";
                 SensorData data = dataService.getLastMeasure(selected);
 
-                if(data!=null) {
+                if (data != null) {
                     prompt = String.format(
                             "✅ Последние данные для датчика \"%s\" (ID %d):\n" +
                                     "💧 Уровень воды: %.2f м\n" +
                                     "🌡 Температура: %s°C\n" +
                                     "💦 Влажность: %s%%\n" +
-                                    "⏰ Время измерения: %s\n"+
-                                    selected.getAddress()!=null ? selected.getAddress().toString() : "",
-                            selected.getSensorName(), selected.getId(),
+                                    "⏰ Время измерения: %s\n" +
+                                    "%s",  // Добавлен %s для адреса
+                            selected.getSensorName(),
+                            selected.getId(),
                             data.getWaterLevel(),
                             data.getTemperature() != null ? String.format("%.2f", data.getTemperature()) : "N/A",
                             data.getHumidity() != null ? String.format("%.2f", data.getHumidity()) : "N/A",
-                            data.getLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                            data.getLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                            selected.getAddress() != null ? selected.getAddress().toString() : ""
                     );
                 }
             }
