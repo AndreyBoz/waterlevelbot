@@ -9,8 +9,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.bozhov.waterlevelbot.sensor.model.Sensor;
+import ru.bozhov.waterlevelbot.sensor.model.SensorData;
 import ru.bozhov.waterlevelbot.telegram.config.WaterLevelBot;
 import ru.bozhov.waterlevelbot.telegram.model.TelegramUser;
+
+import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
@@ -56,6 +59,28 @@ public class BotService {
                 SendMessage message = new SendMessage();
                 message.setChatId(user.getChatId());
                 message.setText("Критический уровень воды зафиксирован на датчике: " + sensor.getSensorName() + "\n Тек. уровень: " + level);
+                bot.execute(message);
+            }
+        } catch (TelegramApiException e) {
+            log.error("Error execute message: {}", e.getMessage(), e);
+        }
+    }
+
+    public void sendMessageForSubscribers(Sensor sensor, SensorData data){
+        try {
+            for(var user: sensor.getSubscribers()){
+                SendMessage message = new SendMessage();
+                message.setChatId(user.getChatId());
+                message.setText("Датчик сделал замер: " + sensor.getSensorName() + String.format(
+                                "💧 Уровень воды: %.2f м\n" +
+                                "🌡 Температура: %s°C\n" +
+                                "💦 Влажность: %s%%\n" +
+                                "⏰ Время измерения: %s",
+                        data.getWaterLevel(),
+                        data.getTemperature() != null ? String.format("%.2f", data.getTemperature()) : "N/A",
+                        data.getHumidity() != null ? String.format("%.2f", data.getHumidity()) : "N/A",
+                        data.getLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                );
                 bot.execute(message);
             }
         } catch (TelegramApiException e) {

@@ -79,9 +79,6 @@ public class SensorDataService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        if (isCriticalLevel(request.getWaterLevel(), sensorOpt.get())) {
-            botService.sendCriticalLevelMessage(sensorOpt.get(), request.getWaterLevel());
-        }
 
         Sensor sensor = sensorOpt.get();
         SensorData sensorData = new SensorData();
@@ -106,6 +103,13 @@ public class SensorDataService {
         }
 
         sensorDataRepository.save(sensorData);
+
+        if (sensorData.getWaterLevel()!=null && isCriticalLevel(request.getWaterLevel(), sensorOpt.get())) {
+            botService.sendCriticalLevelMessage(sensorOpt.get(), sensorData.getWaterLevel());
+        }else {
+            botService.sendMessageForSubscribers(sensorOpt.get(), sensorData);
+        }
+
         return ResponseEntity.ok().build();
     }
 
